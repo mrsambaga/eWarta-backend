@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"errors"
-	"fmt"
 	"regexp"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
@@ -39,12 +37,12 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 
 	err := checkValidEmail(newUserDTO.Email)
 	if err != nil {
-		return httperror.ErrinvalidEmailFormat
+		return err
 	}
 
 	err = checkValidPassword(newUserDTO.Password)
 	if err != nil {
-		return httperror.ErrInvalidPasswordLength
+		return err
 	}
 
 	hashedPassword, err := util.HashPassword(newUserDTO.Password)
@@ -73,14 +71,14 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 func checkValidEmail(email string) error {
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !emailRegex.MatchString(email) {
-		return errors.New("invalid email format")
+		return httperror.ErrInvalidEmailFormat
 	}
 	return nil
 }
 
 func checkValidPassword(password string) error {
 	if len(password) < 8 {
-		return fmt.Errorf("password must be at least 8 characters")
+		return httperror.ErrInvalidPasswordLength
 	}
 	return nil
 }
@@ -93,7 +91,7 @@ func (u *usersUsecaseImp) Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenRe
 
 	registeredUser, err := u.usersRepository.GetUserByEmail(loginUser.Email)
 	if err != nil {
-		return nil, err
+		return nil, httperror.ErrInvalidEmailPassword
 	}
 
 	ok := util.ComparePassword(registeredUser.Password, loginUser.Password)

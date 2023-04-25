@@ -7,8 +7,8 @@ import (
 var (
 	ErrCreateUser             = errors.New("failed to create user")
 	ErrEmailAlreadyRegistered = errors.New("email already registered")
-	ErrinvalidEmailFormat     = errors.New("invalid email format")
-	ErrInvalidPasswordLength  = errors.New("password length must be 8 or more")
+	ErrInvalidEmailFormat     = errors.New("invalid email format")
+	ErrInvalidPasswordLength  = errors.New("password must be at least 8 characters")
 	ErrFailedCreateToken      = errors.New("failed to create token")
 	ErrGenerateHash           = errors.New("failed to generate hash")
 	ErrUserNotFound           = errors.New("user not found")
