@@ -2,16 +2,16 @@ package util
 
 import "github.com/go-playground/validator/v10"
 
-type ErrorMsg struct {
-	Message string `json:"message"`
-}
-
 func GetErrorMsg(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
 		return fe.Field() + " field is required"
 	case "eqfield":
 		return fe.Field() + " must be equal to " + fe.Param()
+	case "email":
+		return "Invalid email format : please enter xxx@xxx.xxx format"
+	case "min":
+		return fe.Field() + " must be " + fe.Param() + " characters or more"
 	}
-	return "Unknown error"
+	return fe.Error()
 }

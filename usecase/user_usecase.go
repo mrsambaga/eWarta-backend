@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"regexp"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/httperror"
@@ -30,19 +29,10 @@ func NewUsersUsecase(cfg *UsersUsecaseConfig) UsersUsecase {
 
 func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 	defaultQuota := 0
+	defaultRole := "user"
 
 	if newUserDTO.Role == "" {
-		newUserDTO.Role = "user"
-	}
-
-	err := checkValidEmail(newUserDTO.Email)
-	if err != nil {
-		return err
-	}
-
-	err = checkValidPassword(newUserDTO.Password)
-	if err != nil {
-		return err
+		newUserDTO.Role = defaultRole
 	}
 
 	hashedPassword, err := util.HashPassword(newUserDTO.Password)
@@ -65,21 +55,6 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		return err
 	}
 
-	return nil
-}
-
-func checkValidEmail(email string) error {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !emailRegex.MatchString(email) {
-		return httperror.ErrInvalidEmailFormat
-	}
-	return nil
-}
-
-func checkValidPassword(password string) error {
-	if len(password) < 8 {
-		return httperror.ErrInvalidPasswordLength
-	}
 	return nil
 }
 

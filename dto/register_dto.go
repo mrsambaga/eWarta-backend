@@ -1,11 +1,11 @@
 package dto
 
 type RegisterRequestDTO struct {
-	Name            string `json:"name" binding:"required"`
-	Email           string `json:"email" binding:"required"`
-	Password        string `json:"password" binding:"required"`
-	PasswordConfirm string `json:"password_confirm" binding:"required"`
-	Phone           string `json:"phone" binding:"required"`
-	Address         string `json:"address" binding:"required"`
+	Name            string `json:"name" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required,min=8,eqfield=PasswordConfirm"`
+	PasswordConfirm string `json:"password_confirm" validate:"required"`
+	Phone           string `json:"phone" validate:"required"`
+	Address         string `json:"address" validate:"required"`
 	Role            string `json:"role"`
 }

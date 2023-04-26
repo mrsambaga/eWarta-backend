@@ -13,33 +13,26 @@ import (
 
 func (h *Handler) Register(c *gin.Context) {
 	var newUser *dto.RegisterRequestDTO
+	var validate *validator.Validate = validator.New()
 
-	if err := c.ShouldBindJSON(&newUser); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			errMsg := make([]string, len(ve))
-			for i, fe := range ve {
-				errMsg[i] = util.GetErrorMsg(fe)
-			}
-
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
-				"message": errMsg,
-				"data":    nil,
-			})
-			return
+	c.ShouldBindJSON(&newUser)
+	err := validate.Struct(newUser)
+	if err != nil {
+		validationError := err.(validator.ValidationErrors)
+		var errMsg []string
+		for _, fieldError := range validationError {
+			errMsg = append(errMsg, util.GetErrorMsg(fieldError))
 		}
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "BAD_REQUEST",
-			"message": err,
+			"message": errMsg,
 			"data":    nil,
 		})
 		return
-
 	}
 
-	err := h.userUsecase.Register(newUser)
+	err = h.userUsecase.Register(newUser)
 	if err != nil {
 		if errors.Is(err, httperror.ErrEmailAlreadyRegistered) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -99,9 +92,9 @@ func (h *Handler) Login(c *gin.Context) {
 	if err := c.ShouldBindJSON(&loginUserDTO); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
-			errMsg := make([]util.ErrorMsg, len(ve))
+			errMsg := make([]string, len(ve))
 			for i, fe := range ve {
-				errMsg[i] = util.ErrorMsg{Message: util.GetErrorMsg(fe)}
+				errMsg[i] = util.GetErrorMsg(fe)
 			}
 
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
