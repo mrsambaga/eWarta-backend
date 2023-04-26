@@ -50,6 +50,11 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		Quota:    defaultQuota,
 	}
 
+	existingUser, _ := u.usersRepository.GetUserByEmail(newUser.Email)
+	if existingUser != nil {
+		return httperror.ErrEmailAlreadyRegistered
+	}
+
 	err = u.usersRepository.CreateUser(newUser)
 	if err != nil {
 		return err
