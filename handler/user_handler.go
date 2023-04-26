@@ -17,9 +17,9 @@ func (h *Handler) Register(c *gin.Context) {
 	if err := c.ShouldBindJSON(&newUser); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
-			errMsg := make([]util.ErrorMsg, len(ve))
+			errMsg := make([]string, len(ve))
 			for i, fe := range ve {
-				errMsg[i] = util.ErrorMsg{Message: util.GetErrorMsg(fe)}
+				errMsg[i] = util.GetErrorMsg(fe)
 			}
 
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -69,6 +69,13 @@ func (h *Handler) Register(c *gin.Context) {
 				"data":    nil,
 			})
 			return
+		} else if errors.Is(err, httperror.ErrInvalidPasswordLength) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "SUCCESS_CREATED",
+				"message": "Password length must be 8 or more",
+				"data":    nil,
+			})
+			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -76,6 +83,7 @@ func (h *Handler) Register(c *gin.Context) {
 			"message": err.Error(),
 			"data":    nil,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
