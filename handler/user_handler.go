@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
@@ -16,6 +17,7 @@ func (h *Handler) Register(c *gin.Context) {
 	var validate *validator.Validate = validator.New()
 
 	c.ShouldBindJSON(&newUser)
+	fmt.Println(newUser)
 	err := validate.Struct(newUser)
 	if err != nil {
 		validationError := err.(validator.ValidationErrors)
@@ -107,7 +109,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "BAD_REQUEST",
-			"message": err,
+			"message": err.Error(),
 			"data":    nil,
 		})
 		return
