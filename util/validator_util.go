@@ -7,13 +7,13 @@ func GetErrorMsg(fe validator.FieldError) string {
 	case "required":
 		return fe.Field() + " field is required"
 	case "eqfield":
-		return fe.Field() + " must be equal to " + fe.Param()
+		return "Password & Password Confirm is not equal"
 	case "email":
 		return "Invalid email format : please enter xxx@xxx.xxx format"
 	case "min":
 		return fe.Field() + " must be " + fe.Param() + " characters or more"
 	case "e164":
-		return "Invalid phone number format, example : +62081283905547"
+		return "Invalid phone number format, example : +6281283905547"
 	}
 	return fe.Error()
 }
