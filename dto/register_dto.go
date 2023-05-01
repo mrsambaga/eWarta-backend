@@ -8,5 +8,5 @@ type RegisterRequestDTO struct {
 	Phone           string `json:"phone" validate:"required,e164"`
 	Address         string `json:"address" validate:"required"`
 	Role            string `json:"role"`
-	RefReferral     string `json:"referral"`
+	RefReferral     string `json:"ref_referral"`
 }

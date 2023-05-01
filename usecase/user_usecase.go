@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/httperror"
@@ -28,12 +29,15 @@ func NewUsersUsecase(cfg *UsersUsecaseConfig) UsersUsecase {
 }
 
 func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
-	defaultQuota := 0
 	defaultRole := "user"
-	defaultSpending := 0
 
 	if newUserDTO.Role == "" {
 		newUserDTO.Role = defaultRole
+	}
+
+	existingUser, _ := u.usersRepository.GetUserByEmail(newUserDTO.Email)
+	if existingUser != nil {
+		return httperror.ErrEmailAlreadyRegistered
 	}
 
 	hashedPassword, err := util.HashPassword(newUserDTO.Password)
@@ -42,6 +46,16 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 	}
 
 	referralCode := util.GenerateReferral(newUserDTO.Name, newUserDTO.Email)
+
+	if newUserDTO.RefReferral != "" {
+		_, err = u.usersRepository.FindUserReferral(newUserDTO.RefReferral)
+		if err != nil {
+			if errors.Is(err, httperror.ErrUserNotFound) {
+				return httperror.ErrInvalidReferral
+			}
+			return httperror.ErrInvalidReferral
+		}
+	}
 
 	newUser := &entity.User{
 		Name:        newUserDTO.Name,
@@ -52,13 +66,6 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		Role:        newUserDTO.Role,
 		Referral:    referralCode,
 		RefReferral: newUserDTO.RefReferral,
-		Quota:       defaultQuota,
-		Spending:    defaultSpending,
-	}
-
-	existingUser, _ := u.usersRepository.GetUserByEmail(newUser.Email)
-	if existingUser != nil {
-		return httperror.ErrEmailAlreadyRegistered
 	}
 
 	err = u.usersRepository.CreateUser(newUser)
@@ -77,7 +84,11 @@ func (u *usersUsecaseImp) Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenRe
 
 	registeredUser, err := u.usersRepository.GetUserByEmail(loginUser.Email)
 	if err != nil {
-		return nil, httperror.ErrInvalidEmailPassword
+		if errors.Is(err, httperror.ErrUserNotFound) {
+			return nil, httperror.ErrInvalidEmailPassword
+		}
+
+		return nil, err
 	}
 
 	ok := util.ComparePassword(registeredUser.Password, loginUser.Password)

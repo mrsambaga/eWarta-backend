@@ -71,6 +71,13 @@ func (h *Handler) Register(c *gin.Context) {
 				"data":    nil,
 			})
 			return
+		} else if errors.Is(err, httperror.ErrInvalidReferral) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "SUCCESS_CREATED",
+				"message": "Invalid referral code",
+				"data":    nil,
+			})
+			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -131,6 +138,7 @@ func (h *Handler) Login(c *gin.Context) {
 			"message": err.Error(),
 			"data":    nil,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
