@@ -30,6 +30,7 @@ func NewUsersUsecase(cfg *UsersUsecaseConfig) UsersUsecase {
 func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 	defaultQuota := 0
 	defaultRole := "user"
+	defaultSpending := 0
 
 	if newUserDTO.Role == "" {
 		newUserDTO.Role = defaultRole
@@ -40,14 +41,19 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		return err
 	}
 
+	referralCode := util.GenerateReferral(newUserDTO.Name, newUserDTO.Email)
+
 	newUser := &entity.User{
-		Name:     newUserDTO.Name,
-		Email:    newUserDTO.Email,
-		Password: hashedPassword,
-		Phone:    newUserDTO.Phone,
-		Address:  newUserDTO.Address,
-		Role:     newUserDTO.Role,
-		Quota:    defaultQuota,
+		Name:        newUserDTO.Name,
+		Email:       newUserDTO.Email,
+		Password:    hashedPassword,
+		Phone:       newUserDTO.Phone,
+		Address:     newUserDTO.Address,
+		Role:        newUserDTO.Role,
+		Referral:    referralCode,
+		RefReferral: newUserDTO.RefReferral,
+		Quota:       defaultQuota,
+		Spending:    defaultSpending,
 	}
 
 	existingUser, _ := u.usersRepository.GetUserByEmail(newUser.Email)

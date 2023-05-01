@@ -13,7 +13,7 @@ type Post struct {
 	Slug        string
 	SummaryDesc string
 	Content     string
-	Type        string
+	TypeId      uint64
 	ImgUrl      string
 	AuthorName  string
 	CreatedAt   time.Time
