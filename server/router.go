@@ -26,6 +26,7 @@ func NewRouter(cfg *RouterConfig) *gin.Engine {
 	router.POST("/register", h.Register)
 	router.POST("/login", h.Login)
 	router.GET("/news", middleware.AuthorizeJWT, h.FindAllNews)
+	router.GET("/news/highlight", middleware.AuthorizeJWT, h.FindAllNewsHighlight)
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 	return router
