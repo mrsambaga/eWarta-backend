@@ -27,7 +27,7 @@ func (h *Handler) Register(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "BAD_REQUEST",
+			"code":    "BAD_REQUEST",
 			"message": errMsg,
 			"data":    nil,
 		})
@@ -38,42 +38,42 @@ func (h *Handler) Register(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrEmailAlreadyRegistered) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "ERROR_CREATED",
 				"message": "Email already registered !",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrCreateUser) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "ERROR_CREATED",
 				"message": "Failed to create user !",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrGenerateHash) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_CREATED",
 				"message": "Failed to generate hash password !",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrInvalidEmailFormat) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_CREATED",
 				"message": "Invalid email, please enter this format : 'xxx@xxx.xxx'",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrInvalidPasswordLength) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_CREATED",
 				"message": "Password length must be 8 or more",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrInvalidReferral) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_CREATED",
 				"message": "Invalid referral code",
 				"data":    nil,
 			})
@@ -81,7 +81,7 @@ func (h *Handler) Register(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})

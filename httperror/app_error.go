@@ -15,4 +15,6 @@ var (
 	ErrFailedGetUserByEmail   = errors.New("failed to get user by email")
 	ErrInvalidEmailPassword   = errors.New("invalid email or password")
 	ErrInvalidReferral        = errors.New("invalid referral")
+	ErrCreatePost             = errors.New("failed to create post")
+	ErrFindNews               = errors.New("failed to find news")
 )
