@@ -45,6 +45,7 @@ func (u *postsUsecaseImp) FindAllNewsHighlight() ([]*dto.PostHighlight, error) {
 			Title:       post.Title,
 			SummaryDesc: post.SummaryDesc,
 			ImgUrl:      post.ImgUrl,
+			Author:      post.AuthorName,
 		}
 		highlights = append(highlights, highlight)
 	}

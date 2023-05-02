@@ -1,7 +1,8 @@
 package dto
 
 type PostHighlight struct {
-	Title string
-	SummaryDesc string
-	ImgUrl string
+	Title       string `json:"title"`
+	SummaryDesc string `json:"summary_desc"`
+	ImgUrl      string `json:"img_url"`
+	Author      string `json:"author"`
 }
