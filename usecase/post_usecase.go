@@ -1,14 +1,15 @@
 package usecase
 
 import (
+	"stage01-project-backend/constant"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/repository"
 )
 
 type PostsUsecase interface {
-	FindAllNews() ([]*entity.Post, error)
-	FindAllNewsHighlight() ([]*dto.PostHighlight, error)
+	FindAllNews(params *constant.Params) ([]*entity.Post, error)
+	FindAllNewsHighlight(*constant.Params) ([]*dto.PostHighlight, error)
 }
 
 type postsUsecaseImp struct {
@@ -25,16 +26,16 @@ func NewPostsUsecase(cfg *PostsUsecaseConfig) PostsUsecase {
 	}
 }
 
-func (u *postsUsecaseImp) FindAllNews() ([]*entity.Post, error) {
-	posts, err := u.postsRepository.GetPosts()
+func (u *postsUsecaseImp) FindAllNews(params *constant.Params) ([]*entity.Post, error) {
+	posts, err := u.postsRepository.GetPosts(params)
 	if err != nil {
 		return nil, err
 	}
 	return posts, nil
 }
 
-func (u *postsUsecaseImp) FindAllNewsHighlight() ([]*dto.PostHighlight, error) {
-	posts, err := u.postsRepository.GetPosts()
+func (u *postsUsecaseImp) FindAllNewsHighlight(params *constant.Params) ([]*dto.PostHighlight, error) {
+	posts, err := u.postsRepository.GetPosts(params)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +43,7 @@ func (u *postsUsecaseImp) FindAllNewsHighlight() ([]*dto.PostHighlight, error) {
 	highlights := make([]*dto.PostHighlight, 0, len(posts))
 	for _, post := range posts {
 		highlight := &dto.PostHighlight{
+			PostId:      post.PostId,
 			Title:       post.Title,
 			SummaryDesc: post.SummaryDesc,
 			ImgUrl:      post.ImgUrl,

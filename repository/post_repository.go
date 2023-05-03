@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+	"stage01-project-backend/constant"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/httperror"
 
@@ -9,7 +11,7 @@ import (
 
 type PostsRepository interface {
 	CreatePost(newPost *entity.Post) error
-	GetPosts() ([]*entity.Post, error)
+	GetPosts(*constant.Params) ([]*entity.Post, error)
 }
 
 type postsRepositoryImp struct {
@@ -38,11 +40,34 @@ func (r *postsRepositoryImp) CreatePost(newPost *entity.Post) error {
 	return nil
 }
 
-func (r *postsRepositoryImp) GetPosts() ([]*entity.Post, error) {
-	users := []*entity.Post{}
-	if err := r.db.Find(&users).Error; err != nil {
+func (r *postsRepositoryImp) GetPosts(params *constant.Params) ([]*entity.Post, error) {
+	fmt.Println(params.Category)
+	posts := []*entity.Post{}
+
+	query := r.db.Joins("JOIN categories ON categories.id = posts.category_id").Where("title ILIKE ?", "%"+params.Title+"%")
+
+	if params.Category != "" {
+		query = query.Where("categories.name = ? ", params.Category)
+	}
+
+	if params.NewsType != "" {
+		switch params.NewsType {
+		case "free":
+			query = query.Where("type_id = ?", 1)
+		case "paid":
+			query = query.Where("type_id IN (?)", []int{2, 3})
+		}
+	}
+
+	if params.Date != "" {
+		query = query.Order("created_at " + params.Date)
+	} else {
+		query = query.Order("created_at DESC")
+	}
+
+	if err := query.Find(&posts).Error; err != nil {
 		return nil, httperror.ErrFindNews
 	}
 
-	return users, nil
+	return posts, nil
 }
