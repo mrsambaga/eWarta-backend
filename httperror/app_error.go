@@ -17,4 +17,6 @@ var (
 	ErrInvalidReferral        = errors.New("invalid referral")
 	ErrCreatePost             = errors.New("failed to create post")
 	ErrFindNews               = errors.New("failed to find news")
+	ErrNewsNotFound           = errors.New("news not found")
+	ErrFailedConvertId        = errors.New("failed to convert id to integer")
 )

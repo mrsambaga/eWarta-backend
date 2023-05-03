@@ -10,6 +10,7 @@ import (
 type PostsUsecase interface {
 	FindAllNews(params *constant.Params) ([]*entity.Post, error)
 	FindAllNewsHighlight(*constant.Params) ([]*dto.PostHighlight, error)
+	FindNewsDetail(id uint64) (*dto.PostDetail, error)
 }
 
 type postsUsecaseImp struct {
@@ -53,4 +54,21 @@ func (u *postsUsecaseImp) FindAllNewsHighlight(params *constant.Params) ([]*dto.
 	}
 
 	return highlights, nil
+}
+
+func (u *postsUsecaseImp) FindNewsDetail(id uint64) (*dto.PostDetail, error) {
+	post, err := u.postsRepository.GetPostById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	postDetail := &dto.PostDetail{
+		Title:       post.Title,
+		SummaryDesc: post.SummaryDesc,
+		ImgUrl:      post.ImgUrl,
+		Content:     post.Content,
+		Author:      post.AuthorName,
+	}
+
+	return postDetail, nil
 }

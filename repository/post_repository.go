@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"fmt"
+	"errors"
 	"stage01-project-backend/constant"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/httperror"
@@ -12,6 +12,7 @@ import (
 type PostsRepository interface {
 	CreatePost(newPost *entity.Post) error
 	GetPosts(*constant.Params) ([]*entity.Post, error)
+	GetPostById(id uint64) (*entity.Post, error)
 }
 
 type postsRepositoryImp struct {
@@ -41,7 +42,6 @@ func (r *postsRepositoryImp) CreatePost(newPost *entity.Post) error {
 }
 
 func (r *postsRepositoryImp) GetPosts(params *constant.Params) ([]*entity.Post, error) {
-	fmt.Println(params.Category)
 	posts := []*entity.Post{}
 
 	query := r.db.Joins("JOIN categories ON categories.id = posts.category_id").Where("title ILIKE ?", "%"+params.Title+"%")
@@ -70,4 +70,18 @@ func (r *postsRepositoryImp) GetPosts(params *constant.Params) ([]*entity.Post, 
 	}
 
 	return posts, nil
+}
+
+func (r *postsRepositoryImp) GetPostById(id uint64) (*entity.Post, error) {
+	post := &entity.Post{}
+
+	if err := r.db.Where("post_id = ?", id).First(&post).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, httperror.ErrNewsNotFound
+		}
+
+		return nil, httperror.ErrFindNews
+	}
+
+	return post, nil
 }
