@@ -1,6 +1,8 @@
 package util
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
 func GetErrorMsg(fe validator.FieldError) string {
 	switch fe.Tag() {
@@ -14,6 +16,8 @@ func GetErrorMsg(fe validator.FieldError) string {
 		return fe.Field() + " must be " + fe.Param() + " characters or more"
 	case "e164":
 		return "Invalid phone number format, example : +6281283905547"
+	case "eq=user|eq=admin":
+		return "Invalid role !"
 	}
 	return fe.Error()
 }

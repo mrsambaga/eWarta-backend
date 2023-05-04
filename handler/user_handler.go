@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
@@ -17,7 +16,6 @@ func (h *Handler) Register(c *gin.Context) {
 	var validate *validator.Validate = validator.New()
 
 	c.ShouldBindJSON(&newUser)
-	fmt.Println(newUser)
 	err := validate.Struct(newUser)
 	if err != nil {
 		validationError := err.(validator.ValidationErrors)
@@ -97,26 +95,20 @@ func (h *Handler) Register(c *gin.Context) {
 
 func (h *Handler) Login(c *gin.Context) {
 	var loginUserDTO *dto.LoginRequestDTO
+	var validate *validator.Validate = validator.New()
 
-	if err := c.ShouldBindJSON(&loginUserDTO); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			errMsg := make([]string, len(ve))
-			for i, fe := range ve {
-				errMsg[i] = util.GetErrorMsg(fe)
-			}
-
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
-				"message": errMsg,
-				"data":    nil,
-			})
-			return
+	c.ShouldBindJSON(&loginUserDTO)
+	err := validate.Struct(loginUserDTO)
+	if err != nil {
+		validationError := err.(validator.ValidationErrors)
+		var errMsg []string
+		for _, fieldError := range validationError {
+			errMsg = append(errMsg, util.GetErrorMsg(fieldError))
 		}
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "BAD_REQUEST",
-			"message": err.Error(),
+			"code":    "BAD_REQUEST",
+			"message": errMsg,
 			"data":    nil,
 		})
 		return

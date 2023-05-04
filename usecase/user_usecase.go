@@ -35,7 +35,7 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		newUserDTO.Role = defaultRole
 	}
 
-	existingUser, _ := u.usersRepository.GetUserByEmail(newUserDTO.Email)
+	existingUser, _ := u.usersRepository.GetUserByEmailRole(newUserDTO.Email, newUserDTO.Role)
 	if existingUser != nil {
 		return httperror.ErrEmailAlreadyRegistered
 	}
@@ -80,9 +80,10 @@ func (u *usersUsecaseImp) Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenRe
 	loginUser := &entity.User{
 		Email:    loginUserDTO.Email,
 		Password: loginUserDTO.Password,
+		Role:     loginUserDTO.Role,
 	}
 
-	registeredUser, err := u.usersRepository.GetUserByEmail(loginUser.Email)
+	registeredUser, err := u.usersRepository.GetUserByEmailRole(loginUser.Email, loginUser.Role)
 	if err != nil {
 		if errors.Is(err, httperror.ErrUserNotFound) {
 			return nil, httperror.ErrInvalidEmailPassword

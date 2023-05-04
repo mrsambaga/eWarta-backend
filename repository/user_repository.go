@@ -11,7 +11,7 @@ import (
 
 type UsersRepository interface {
 	CreateUser(newUser *entity.User) error
-	GetUserByEmail(email string) (*entity.User, error)
+	GetUserByEmailRole(email string, role string) (*entity.User, error)
 	FindUserReferral(referral string) (*entity.User, error)
 }
 
@@ -41,9 +41,22 @@ func (r *userRepositoryImp) CreateUser(newUser *entity.User) error {
 	return nil
 }
 
-func (r *userRepositoryImp) GetUserByEmail(email string) (*entity.User, error) {
+func (r *userRepositoryImp) GetAdminByEmail(email string) (*entity.User, error) {
 	user := &entity.User{}
-	if err := r.db.Where("email = ?", email).First(user).Error; err != nil {
+	if err := r.db.Where("role = ", "admin").Where("email = ?", email).First(user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, httperror.ErrUserNotFound
+		}
+
+		return nil, httperror.ErrFailedGetUserByEmail
+	}
+
+	return user, nil
+}
+
+func (r *userRepositoryImp) GetUserByEmailRole(email string, role string) (*entity.User, error) {
+	user := &entity.User{}
+	if err := r.db.Where("role = ?", role).Where("email = ?", email).First(user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, httperror.ErrUserNotFound
 		}

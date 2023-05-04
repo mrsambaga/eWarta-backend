@@ -19,4 +19,5 @@ var (
 	ErrFindNews               = errors.New("failed to find news")
 	ErrNewsNotFound           = errors.New("news not found")
 	ErrFailedConvertId        = errors.New("failed to convert id to integer")
+	ErrInvalidRole            = errors.New("invalid role")
 )
