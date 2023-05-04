@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"stage01-project-backend/constant"
+	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
 	"strconv"
 
@@ -12,6 +13,7 @@ import (
 
 func (h *Handler) FindAllNews(c *gin.Context) {
 	params := &constant.Params{
+		Title:    c.Query("title"),
 		Category: c.Query("category"),
 		NewsType: c.Query("type"),
 		Date:     c.Query("date"),
@@ -30,31 +32,6 @@ func (h *Handler) FindAllNews(c *gin.Context) {
 		"code":    "SUCCESS_CREATED",
 		"message": "Success Find Posts",
 		"data":    posts,
-	})
-}
-
-func (h *Handler) FindAllNewsHighlight(c *gin.Context) {
-	params := &constant.Params{
-		Title:    c.Query("title"),
-		Category: c.Query("category"),
-		NewsType: c.Query("type"),
-		Date:     c.Query("date"),
-	}
-
-	postsHighlight, err := h.postUsecase.FindAllNewsHighlight(params)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
-			"message": err.Error(),
-			"data":    nil,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    "SUCCESS_CREATED",
-		"message": "Success Find Posts Highlight",
-		"data":    postsHighlight,
 	})
 }
 
@@ -93,5 +70,43 @@ func (h *Handler) FindNewsDetail(c *gin.Context) {
 		"code":    "SUCCESS_CREATED",
 		"message": "Success Find Posts Highlight",
 		"data":    postsHighlight,
+	})
+}
+
+func (h *Handler) SoftDeletePost(c *gin.Context) {
+	deletedPost := &dto.DeletePostDTO{}
+
+	if err := c.ShouldBindJSON(&deletedPost); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "BAD_REQUEST",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	err := h.postUsecase.SoftDeletePost(deletedPost)
+	if err != nil {
+		if errors.Is(err, httperror.ErrNewsNotFound) {
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+				"error":   "SUCCESS_CREATED",
+				"message": "Post not found",
+				"data":    nil,
+			})
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success Delete Post",
+		"data":    nil,
 	})
 }
