@@ -87,6 +87,16 @@ func (u *postsUsecaseImp) SoftDeleteNews(deletedPost *dto.DeletePostDTO) error {
 }
 
 func (u *postsUsecaseImp) CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error {
+	categoryId, err := util.ConvertCategoryToCategoryId(newPostDTO.Category)
+	if err != nil {
+		return err
+	}
+
+	typeId, err := util.ConvertTypeToTypeId(newPostDTO.Type)
+	if err != nil {
+		return err
+	}
+
 	cld, err := util.InitiateCloudinary()
 	if err != nil {
 		return err
@@ -103,8 +113,8 @@ func (u *postsUsecaseImp) CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error
 		SummaryDesc: newPostDTO.SummaryDesc,
 		Slug:        newPostDTO.Slug,
 		ImgUrl:      imageURL,
-		TypeId:      newPostDTO.TypeId,
-		CategoryId:  newPostDTO.CategoryId,
+		TypeId:      typeId,
+		CategoryId:  categoryId,
 		Content:     newPostDTO.Content,
 	}
 
@@ -115,26 +125,3 @@ func (u *postsUsecaseImp) CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error
 
 	return nil
 }
-
-// func (u *postsUsecaseImp) FindAllNewsHighlight(params *constant.Params) ([]*dto.PostHighlight, error) {
-// 	posts, err := u.postsRepository.GetPosts(params)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	highlights := make([]*dto.PostHighlight, 0, len(posts))
-// 	for _, post := range posts {
-// 		highlight := &dto.PostHighlight{
-// 			PostId:      post.PostId,
-// 			Title:       post.Title,
-// 			SummaryDesc: post.SummaryDesc,
-// 			ImgUrl:      post.ImgUrl,
-// 			Author:      post.AuthorName,
-// 		}
-// 		highlights = append(highlights, highlight)
-// 	}
-
-// 	return highlights, nil
-// }
-
-

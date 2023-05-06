@@ -165,6 +165,22 @@ func (h *Handler) CreateNewPost(c *gin.Context) {
 
 	err = h.postUsecase.CreateNewPost(newPostDTO)
 	if err != nil {
+		if errors.Is(err, httperror.ErrInvalidCategory) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "BAD_REQUEST",
+				"message": "Invalid category",
+				"data":    nil,
+			})
+			return
+		} else if errors.Is(err, httperror.ErrInvalidType) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "BAD_REQUEST",
+				"message": "Invalid type",
+				"data":    nil,
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),

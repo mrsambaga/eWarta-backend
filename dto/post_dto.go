@@ -37,8 +37,8 @@ type NewPostRequestDTO struct {
 	Content     string               `form:"content" validate:"required"`
 	Author      string               `form:"author" validate:"required"`
 	Slug        string               `form:"slug" validate:"required"`
-	TypeId      uint64               `form:"typeId" validate:"required"`
-	CategoryId  uint64               `form:"categoryId" validate:"required"`
+	Type        string               `form:"type" validate:"required"`
+	Category    string               `form:"category" validate:"required"`
 }
 
 type DeletePostDTO struct {

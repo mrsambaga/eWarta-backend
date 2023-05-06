@@ -23,4 +23,6 @@ var (
 	ErrDeleteNews               = errors.New("failed to delete news")
 	ErrFailedInitiateCloudinary = errors.New("failed to initiate cloudinary")
 	ErrFailedOpenFile           = errors.New("failed to open file")
+	ErrInvalidType              = errors.New("invalid type")
+	ErrInvalidCategory          = errors.New("invalid category")
 )
