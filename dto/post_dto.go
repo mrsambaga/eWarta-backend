@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"mime/multipart"
 	"time"
 
 	"gorm.io/gorm"
@@ -27,6 +28,17 @@ type PostDTO struct {
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `json:"deletedAt"`
+}
+
+type NewPostRequestDTO struct {
+	Title       string               `form:"title" validate:"required"`
+	SummaryDesc string               `form:"summaryDesc" validate:"required"`
+	Image       multipart.FileHeader `form:"image" validate:"required,file"`
+	Content     string               `form:"content" validate:"required"`
+	Author      string               `form:"author" validate:"required"`
+	Slug        string               `form:"slug" validate:"required"`
+	TypeId      uint64               `form:"typeId" validate:"required"`
+	CategoryId  uint64               `form:"categoryId" validate:"required"`
 }
 
 type DeletePostDTO struct {

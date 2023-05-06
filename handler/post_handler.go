@@ -6,9 +6,11 @@ import (
 	"stage01-project-backend/constant"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
+	"stage01-project-backend/util"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func (h *Handler) FindAllNews(c *gin.Context) {
@@ -85,7 +87,7 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 		return
 	}
 
-	err := h.postUsecase.SoftDeletePost(deletedPost)
+	err := h.postUsecase.SoftDeleteNews(deletedPost)
 	if err != nil {
 		if errors.Is(err, httperror.ErrNewsNotFound) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -107,6 +109,73 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    "SUCCESS_CREATED",
 		"message": "Success Delete Post",
+		"data":    nil,
+	})
+}
+
+func (h *Handler) CreateNewPost(c *gin.Context) {
+	newPostDTO := &dto.NewPostRequestDTO{}
+	var validate *validator.Validate = validator.New()
+
+	err := c.Request.ParseMultipartForm(32 << 20)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": "Failed to parse multipart form data",
+			"data":    nil,
+		})
+		return
+	}
+
+	c.ShouldBind(newPostDTO)
+
+	if newPostDTO.Image.Filename == "" || newPostDTO.Image.Size == 0 || newPostDTO.Image.Header.Get("Content-Type") == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": "Image field is required",
+			"data":    nil,
+		})
+		return
+	}
+
+	if newPostDTO.Image.Header.Get("Content-Type") != "image/jpeg" && newPostDTO.Image.Header.Get("Content-Type") != "image/png" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": "Uploaded file is not an image (JPEG or PNG)",
+			"data":    nil,
+		})
+		return
+	}
+
+	err = validate.Struct(newPostDTO)
+	if err != nil {
+		validationError := err.(validator.ValidationErrors)
+		var errMsg []string
+		for _, fieldError := range validationError {
+			errMsg = append(errMsg, util.GetErrorMsg(fieldError))
+		}
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": errMsg,
+			"data":    nil,
+		})
+		return
+	}
+
+	err = h.postUsecase.CreateNewPost(newPostDTO)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success Create New Post",
 		"data":    nil,
 	})
 }

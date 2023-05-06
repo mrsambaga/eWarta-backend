@@ -28,7 +28,8 @@ func NewRouter(cfg *RouterConfig) *gin.Engine {
 	router.GET("/news", middleware.AuthorizeJWT, h.FindAllNews)
 	// router.GET("/news/highlight", middleware.AuthorizeJWT, h.FindAllNewsHighlight)
 	router.GET("/news/:id", middleware.AuthorizeJWT, h.FindNewsDetail)
-	router.POST("news/delete", middleware.AuthorizeJWT, h.SoftDeletePost)
+	router.POST("/news/delete", middleware.AuthorizeJWT, h.SoftDeletePost)
+	router.POST("/news", middleware.AuthorizeJWT, h.CreateNewPost)
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 	return router

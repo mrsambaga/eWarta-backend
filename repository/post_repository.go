@@ -32,10 +32,6 @@ func NewPostRepository(cfg *PostsRConfig) PostsRepository {
 
 func (r *postsRepositoryImp) CreatePost(newPost *entity.Post) error {
 	if err := r.db.Create(newPost).Error; err != nil {
-		// if errors.Is(err, gorm.ErrDuplicatedKey) {
-		// 	return httperror.ErrEmailAlreadyRegistered
-		// }
-
 		return httperror.ErrCreatePost
 	}
 
