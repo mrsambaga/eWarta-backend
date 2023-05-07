@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"stage01-project-backend/config"
 	"stage01-project-backend/httperror"
+	"strings"
 	"time"
 
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -45,4 +46,23 @@ func UploadImage(cld *cloudinary.Cloudinary, input *multipart.FileHeader) (strin
 	}
 
 	return uploadResult.SecureURL, nil
+}
+
+func GetPublicIdFromUrl(url string) string {
+	parts := strings.Split(url, "/")
+	return parts[len(parts)-1][:strings.Index(parts[len(parts)-1], ".")]
+}
+
+func DeleteImage(cld *cloudinary.Cloudinary, publicId string) error {
+
+	delParams := uploader.DestroyParams{
+		PublicID: publicId,
+	}
+
+	_, err := cld.Upload.Destroy(context.Background(), delParams)
+	if err != nil {
+		return httperror.ErrFailedToDeleteImage
+	}
+
+	return nil
 }

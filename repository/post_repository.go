@@ -13,7 +13,7 @@ type PostsRepository interface {
 	CreatePost(newPost *entity.Post) error
 	GetPosts(*constant.Params) ([]*entity.Post, error)
 	GetPostById(id uint64) (*entity.Post, error)
-	SoftDeletePost(id uint64) error
+	SoftDeletePost(id uint64) (string, error)
 }
 
 type postsRepositoryImp struct {
@@ -83,14 +83,26 @@ func (r *postsRepositoryImp) GetPostById(id uint64) (*entity.Post, error) {
 	return post, nil
 }
 
-func (r *postsRepositoryImp) SoftDeletePost(id uint64) error {
+func (r *postsRepositoryImp) SoftDeletePost(id uint64) (string, error) {
 	post := &entity.Post{}
-	if err := r.db.Where("post_id = ?", id).Delete(post).Error; err != nil {
+
+	if err := r.db.Where("post_id = ?", id).First(post).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return httperror.ErrNewsNotFound
+			return "", httperror.ErrNewsNotFound
 		}
 
-		return httperror.ErrDeleteNews
+		return "", httperror.ErrDeleteNews
 	}
-	return nil
+
+	imageUrl := post.ImgUrl
+
+	if err := r.db.Where("post_id = ?", id).Delete(post).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", httperror.ErrNewsNotFound
+		}
+
+		return "", httperror.ErrDeleteNews
+	}
+
+	return imageUrl, nil
 }

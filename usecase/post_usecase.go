@@ -78,8 +78,19 @@ func (u *postsUsecaseImp) FindNewsDetail(id uint64) (*dto.PostDetail, error) {
 func (u *postsUsecaseImp) SoftDeleteNews(deletedPost *dto.DeletePostDTO) error {
 	id := deletedPost.PostId
 
-	err := u.postsRepository.SoftDeletePost(id)
+	imageUrl, err := u.postsRepository.SoftDeletePost(id)
 	if err != nil {
+		return err
+	}
+
+	publicId := util.GetPublicIdFromUrl(imageUrl)
+
+	cld, err := util.InitiateCloudinary()
+	if err != nil {
+		return err
+	}
+
+	if err := util.DeleteImage(cld, publicId); err != nil {
 		return err
 	}
 

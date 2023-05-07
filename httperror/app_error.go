@@ -25,4 +25,5 @@ var (
 	ErrFailedOpenFile           = errors.New("failed to open file")
 	ErrInvalidType              = errors.New("invalid type")
 	ErrInvalidCategory          = errors.New("invalid category")
+	ErrFailedToDeleteImage      = errors.New("failed to delete image")
 )
