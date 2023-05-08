@@ -13,6 +13,7 @@ type UsersRepository interface {
 	CreateUser(newUser *entity.User) error
 	GetUserByEmailRole(email string, role string) (*entity.User, error)
 	FindUserReferral(referral string) (*entity.User, error)
+	GetUserById(id int) (*entity.User, error)
 }
 
 type userRepositoryImp struct {
@@ -62,6 +63,19 @@ func (r *userRepositoryImp) GetUserByEmailRole(email string, role string) (*enti
 		}
 
 		return nil, httperror.ErrFailedGetUserByEmail
+	}
+
+	return user, nil
+}
+
+func (r *userRepositoryImp) GetUserById(id int) (*entity.User, error) {
+	user := &entity.User{}
+	if err := r.db.Where("user_id = ?", id).First(user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, httperror.ErrUserNotFound
+		}
+
+		return nil, httperror.ErrFailedGetUserById
 	}
 
 	return user, nil

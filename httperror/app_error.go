@@ -26,4 +26,6 @@ var (
 	ErrInvalidType              = errors.New("invalid type")
 	ErrInvalidCategory          = errors.New("invalid category")
 	ErrFailedToDeleteImage      = errors.New("failed to delete image")
+	ErrUpdatePost               = errors.New("error updating post")
+	ErrFailedGetUserById        = errors.New("failed to get user by id")
 )

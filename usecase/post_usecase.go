@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+	"fmt"
 	"stage01-project-backend/constant"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
@@ -10,10 +12,10 @@ import (
 
 type PostsUsecase interface {
 	FindAllNews(params *constant.Params) ([]*dto.PostDTO, error)
-	// FindAllNewsHighlight(*constant.Params) ([]*dto.PostHighlight, error)
 	FindNewsDetail(id uint64) (*dto.PostDetail, error)
 	SoftDeleteNews(deletedPost *dto.DeletePostDTO) error
-	CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error
+	CreateNews(newPostDTO *dto.NewPostRequestDTO) error
+	EditNews(editedPostDTO *dto.EditPostRequestDTO, postId uint64) error
 }
 
 type postsUsecaseImp struct {
@@ -47,6 +49,8 @@ func (u *postsUsecaseImp) FindAllNews(params *constant.Params) ([]*dto.PostDTO, 
 			Slug:        post.AuthorName,
 			TypeId:      post.TypeId,
 			CategoryId:  post.CategoryId,
+			Type:        post.Type.Type,
+			Category:    post.Category.Name,
 			Content:     post.Content,
 			CreatedAt:   post.CreatedAt,
 			UpdatedAt:   post.UpdatedAt,
@@ -97,7 +101,7 @@ func (u *postsUsecaseImp) SoftDeleteNews(deletedPost *dto.DeletePostDTO) error {
 	return nil
 }
 
-func (u *postsUsecaseImp) CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error {
+func (u *postsUsecaseImp) CreateNews(newPostDTO *dto.NewPostRequestDTO) error {
 	categoryId, err := util.ConvertCategoryToCategoryId(newPostDTO.Category)
 	if err != nil {
 		return err
@@ -113,23 +117,99 @@ func (u *postsUsecaseImp) CreateNewPost(newPostDTO *dto.NewPostRequestDTO) error
 		return err
 	}
 
-	imageURL, err := util.UploadImage(cld, &newPostDTO.Image)
-	if err != nil {
-		return err
+	imageURL := ""
+	if newPostDTO.Image.Filename != "" || newPostDTO.Image.Size != 0 || newPostDTO.Image.Header.Get("Content-Type") != "" {
+		imageURL, err = util.UploadImage(cld, &newPostDTO.Image)
+		if err != nil {
+			return err
+		}
 	}
 
-	newPost := &entity.Post{
+	newPost := &entity.Post{}
+
+	newPost = &entity.Post{
 		Title:       newPostDTO.Title,
 		AuthorName:  newPostDTO.Author,
 		SummaryDesc: newPostDTO.SummaryDesc,
 		Slug:        newPostDTO.Slug,
-		ImgUrl:      imageURL,
 		TypeId:      typeId,
 		CategoryId:  categoryId,
 		Content:     newPostDTO.Content,
+		ImgUrl:      imageURL,
 	}
 
 	err = u.postsRepository.CreatePost(newPost)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *postsUsecaseImp) EditNews(editedPostDTO *dto.EditPostRequestDTO, postId uint64) error {
+	categoryId, err := util.ConvertCategoryToCategoryId(editedPostDTO.Category)
+	if err != nil {
+		return err
+	}
+
+	typeId, err := util.ConvertTypeToTypeId(editedPostDTO.Type)
+	if err != nil {
+		return err
+	}
+
+	cld, err := util.InitiateCloudinary()
+	if err != nil {
+		return err
+	}
+
+	newImageURL := ""
+	if editedPostDTO.Image.Filename != "" || editedPostDTO.Image.Size != 0 || editedPostDTO.Image.Header.Get("Content-Type") != "" {
+
+		if editedPostDTO.Image.Header.Get("Content-Type") != "image/jpeg" && editedPostDTO.Image.Header.Get("Content-Type") != "image/png" {
+			return errors.New("upload file is not a jpg or png")
+		}
+
+		newImageURL, err = util.UploadImage(cld, &editedPostDTO.Image)
+		if err != nil {
+			return err
+		}
+	}
+
+	existingPost, err := u.postsRepository.GetPostById(postId)
+	if err != nil {
+		return err
+	}
+	editedPost := &entity.Post{}
+
+	if newImageURL != "" {
+		editedPost = &entity.Post{
+			PostId:      postId,
+			Title:       editedPostDTO.Title,
+			AuthorName:  editedPostDTO.Author,
+			SummaryDesc: editedPostDTO.SummaryDesc,
+			Slug:        editedPostDTO.Slug,
+			TypeId:      typeId,
+			CategoryId:  categoryId,
+			Content:     editedPostDTO.Content,
+			ImgUrl:      newImageURL,
+		}
+	} else if newImageURL == "" {
+		editedPost = &entity.Post{
+			PostId:      postId,
+			Title:       editedPostDTO.Title,
+			AuthorName:  editedPostDTO.Author,
+			SummaryDesc: editedPostDTO.SummaryDesc,
+			Slug:        editedPostDTO.Slug,
+			TypeId:      typeId,
+			CategoryId:  categoryId,
+			Content:     editedPostDTO.Content,
+			ImgUrl:      existingPost.ImgUrl,
+		}
+	}
+
+	fmt.Println("EDITED POST : ", editedPost)
+
+	err = u.postsRepository.UpdatePost(editedPost)
 	if err != nil {
 		return err
 	}

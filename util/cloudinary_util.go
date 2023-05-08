@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"stage01-project-backend/config"
 	"stage01-project-backend/httperror"
@@ -54,15 +55,20 @@ func GetPublicIdFromUrl(url string) string {
 }
 
 func DeleteImage(cld *cloudinary.Cloudinary, publicId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	delParams := uploader.DestroyParams{
 		PublicID: publicId,
 	}
 
-	_, err := cld.Upload.Destroy(context.Background(), delParams)
+	fmt.Println(delParams)
+	res, err := cld.Upload.Destroy(ctx, delParams)
 	if err != nil {
 		return httperror.ErrFailedToDeleteImage
 	}
+
+	fmt.Println(res)
 
 	return nil
 }

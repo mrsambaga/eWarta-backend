@@ -24,7 +24,9 @@ type PostDTO struct {
 	Author      string         `json:"author"`
 	Slug        string         `json:"slug"`
 	TypeId      uint64         `json:"typeId"`
-	CategoryId  uint64         `json:"categoryId:"`
+	CategoryId  uint64         `json:"categoryId"`
+	Type        string         `json:"type"`
+	Category    string         `json:"category"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `json:"deletedAt"`
@@ -39,6 +41,17 @@ type NewPostRequestDTO struct {
 	Slug        string               `form:"slug" validate:"required"`
 	Type        string               `form:"type" validate:"required"`
 	Category    string               `form:"category" validate:"required"`
+}
+
+type EditPostRequestDTO struct {
+	Title       string               `form:"title"`
+	SummaryDesc string               `form:"summaryDesc"`
+	Content     string               `form:"content"`
+	Author      string               `form:"author"`
+	Slug        string               `form:"slug"`
+	Type        string               `form:"type"`
+	Category    string               `form:"category"`
+	Image       multipart.FileHeader `form:"image"`
 }
 
 type DeletePostDTO struct {

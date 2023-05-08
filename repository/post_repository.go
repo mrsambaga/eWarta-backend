@@ -14,6 +14,7 @@ type PostsRepository interface {
 	GetPosts(*constant.Params) ([]*entity.Post, error)
 	GetPostById(id uint64) (*entity.Post, error)
 	SoftDeletePost(id uint64) (string, error)
+	UpdatePost(updatedPost *entity.Post) error
 }
 
 type postsRepositoryImp struct {
@@ -38,10 +39,18 @@ func (r *postsRepositoryImp) CreatePost(newPost *entity.Post) error {
 	return nil
 }
 
+func (r *postsRepositoryImp) UpdatePost(updatedPost *entity.Post) error {
+	if err := r.db.Save(updatedPost).Error; err != nil {
+		return httperror.ErrUpdatePost
+	}
+
+	return nil
+}
+
 func (r *postsRepositoryImp) GetPosts(params *constant.Params) ([]*entity.Post, error) {
 	posts := []*entity.Post{}
 
-	query := r.db.Joins("JOIN categories ON categories.id = posts.category_id").Where("title ILIKE ?", "%"+params.Title+"%")
+	query := r.db.Preload("Category").Preload("Type").Joins("JOIN categories ON categories.id = posts.category_id").Where("title ILIKE ?", "%"+params.Title+"%")
 
 	if params.Category != "" {
 		query = query.Where("categories.name = ? ", params.Category)

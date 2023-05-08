@@ -113,7 +113,7 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 	})
 }
 
-func (h *Handler) CreateNewPost(c *gin.Context) {
+func (h *Handler) CreateNews(c *gin.Context) {
 	newPostDTO := &dto.NewPostRequestDTO{}
 	var validate *validator.Validate = validator.New()
 
@@ -163,7 +163,7 @@ func (h *Handler) CreateNewPost(c *gin.Context) {
 		return
 	}
 
-	err = h.postUsecase.CreateNewPost(newPostDTO)
+	err = h.postUsecase.CreateNews(newPostDTO)
 	if err != nil {
 		if errors.Is(err, httperror.ErrInvalidCategory) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -192,6 +192,64 @@ func (h *Handler) CreateNewPost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    "SUCCESS_CREATED",
 		"message": "Success Create New Post",
+		"data":    nil,
+	})
+}
+
+func (h *Handler) EditNews(c *gin.Context) {
+	editedPostDTO := &dto.EditPostRequestDTO{}
+	id := c.Param("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "BAD_REQUEST",
+			"message": httperror.ErrFailedConvertId,
+			"data":    nil,
+		})
+		return
+	}
+
+	err = c.Request.ParseMultipartForm(32 << 20)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": "Failed to parse multipart form data",
+			"data":    nil,
+		})
+		return
+	}
+
+	c.ShouldBind(editedPostDTO)
+
+	err = h.postUsecase.EditNews(editedPostDTO, uint64(idInt))
+	if err != nil {
+		if errors.Is(err, httperror.ErrInvalidCategory) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "BAD_REQUEST",
+				"message": "Invalid category",
+				"data":    nil,
+			})
+			return
+		} else if errors.Is(err, httperror.ErrInvalidType) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "BAD_REQUEST",
+				"message": "Invalid type",
+				"data":    nil,
+			})
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success Edit Post",
 		"data":    nil,
 	})
 }

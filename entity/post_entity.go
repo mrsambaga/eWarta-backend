@@ -19,4 +19,6 @@ type Post struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt
+	Category    Category
+	Type        Type
 }

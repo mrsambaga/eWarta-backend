@@ -12,6 +12,7 @@ import (
 type UsersUsecase interface {
 	Register(newUserDTO *dto.RegisterRequestDTO) error
 	Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenResponse, error)
+	GetProfile(id int) (*dto.UserRespondDTO, error)
 }
 
 type usersUsecaseImp struct {
@@ -104,4 +105,22 @@ func (u *usersUsecaseImp) Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenRe
 	}
 
 	return token, nil
+}
+
+func (u *usersUsecaseImp) GetProfile(id int) (*dto.UserRespondDTO, error) {
+	user, err := u.usersRepository.GetUserById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	userDTO := &dto.UserRespondDTO{
+		Name:     user.Name,
+		Email:    user.Email,
+		Phone:    user.Phone,
+		Address:  user.Address,
+		Quota:    user.Quota,
+		Referral: user.Referral,
+	}
+
+	return userDTO, nil
 }

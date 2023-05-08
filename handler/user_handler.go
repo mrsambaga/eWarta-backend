@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
@@ -137,5 +138,35 @@ func (h *Handler) Login(c *gin.Context) {
 		"code":    "SUCCESS_CREATED",
 		"message": "Login successful !",
 		"data":    token,
+	})
+}
+
+func (h *Handler) GetProfile(c *gin.Context) {
+	loggedUserId := c.GetInt("id")
+
+	fmt.Println("LOGGED IN USER : ", loggedUserId)
+	user, err := h.userUsecase.GetProfile(loggedUserId)
+	if err != nil {
+		if errors.Is(err, httperror.ErrUserNotFound) {
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+				"error":   "SUCCESS_CREATED",
+				"message": "User not found !",
+				"data":    nil,
+			})
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success get user !",
+		"data":    user,
 	})
 }
