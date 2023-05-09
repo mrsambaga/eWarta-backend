@@ -35,6 +35,8 @@ func NewRouter(cfg *RouterConfig) *gin.Engine {
 	router.GET("/profile", middleware.AuthorizeJWT, h.GetProfile)
 	router.PATCH("/profile/edit", middleware.AuthorizeJWT, h.UpdateProfile)
 	router.POST("/transaction", middleware.AuthorizeJWT, h.CreateNewTransaction)
+	router.GET("/transaction/user", middleware.AuthorizeJWT, h.FindAllUserTransactions)
+	router.PUT("/transaction", middleware.AuthorizeJWT, h.UpdateTransaction)
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 	return router

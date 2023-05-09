@@ -31,4 +31,6 @@ var (
 	ErrUpdateUser               = errors.New("failed to update user")
 	ErrCreateInvoice            = errors.New("failed to create invoice")
 	ErrCreateTransaction        = errors.New("failed to create transaction")
+	ErrFindUserTransactions     = errors.New("failed to find user transactions")
+	ErrUpdateTransactions       = errors.New("failed to update transaction")
 )

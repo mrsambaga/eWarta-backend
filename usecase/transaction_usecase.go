@@ -1,14 +1,15 @@
 package usecase
 
 import (
-	"fmt"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/repository"
 )
 
 type TransactionUsecase interface {
-	CreateNewTransaction(newTransactionDTO *dto.TransactionRequestDTO, userId uint64) error
+	CreateNewTransaction(newTransactionDTO *dto.TransactionRequestDTO, userId uint64) (*dto.TransactionResponseDTO, error)
+	FindUserTransactions(userId int) ([]*dto.TransactionResponseDTO, error)
+	UpdateTransaction(updatedTransactionDTO *dto.EditTransactionRequestDTO) error
 }
 
 type transactionUsecaseImp struct {
@@ -25,26 +26,60 @@ func NewSubscriptionUsecase(cfg *TransactionUConfig) TransactionUsecase {
 	}
 }
 
-func (u *transactionUsecaseImp) CreateNewTransaction(newTransactionDTO *dto.TransactionRequestDTO, userId uint64) error {
+func (u *transactionUsecaseImp) CreateNewTransaction(newTransactionDTO *dto.TransactionRequestDTO, userId uint64) (*dto.TransactionResponseDTO, error) {
 
-	newInvoice := &entity.Invoice{
-		UserId:      userId,
-		Status:      newTransactionDTO.Status,
-		Total:       newTransactionDTO.Total,
-		PaymentDate: newTransactionDTO.PaymentDate,
+	newTransaction := &entity.Transaction{
+		UserId:         userId,
+		Status:         newTransactionDTO.Status,
+		Total:          newTransactionDTO.Total,
+		PaymentDate:    newTransactionDTO.PaymentDate,
+		SubscriptionId: newTransactionDTO.SubscriptionId,
+		VoucherId:      &newTransactionDTO.VoucherId,
 	}
 
-	if newTransactionDTO.VoucherId != 0 {
-		newInvoice.VoucherId = &newTransactionDTO.VoucherId
+	if newTransactionDTO.VoucherId == 0 {
+		newTransaction.VoucherId = nil
 	}
 
-	fmt.Println("Voucher ID : ", newTransactionDTO.VoucherId)
-	fmt.Println("Voucher ID Transaction : ", newInvoice.VoucherId)
+	transaction, err := u.transactionRepository.CreateNewTransaction(newTransaction)
+	if err != nil {
+		return nil, err
+	}
 
-	err := u.transactionRepository.CreateNewTransaction(newInvoice, newTransactionDTO.SubscriptionId)
+	transactionResponse := &dto.TransactionResponseDTO{
+		TransactionId: transaction.Id,
+		Status:        transaction.Status,
+		Total:         transaction.Total,
+		Subscription:  transaction.Subscription.Name,
+	}
+
+	return transactionResponse, nil
+}
+
+func (u *transactionUsecaseImp) FindUserTransactions(userId int) ([]*dto.TransactionResponseDTO, error) {
+	transactions, err := u.transactionRepository.FindTransactionsByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	transactionsDTO := make([]*dto.TransactionResponseDTO, 0, len(transactions))
+	for _, transaction := range transactions {
+		transaction := &dto.TransactionResponseDTO{
+			TransactionId: transaction.Id,
+			Status:        transaction.Status,
+			Total:         transaction.Total,
+			Subscription:  transaction.Subscription.Name,
+		}
+		transactionsDTO = append(transactionsDTO, transaction)
+	}
+
+	return transactionsDTO, nil
+}
+
+func (u *transactionUsecaseImp) UpdateTransaction(updatedTransactionDTO *dto.EditTransactionRequestDTO) error {
+	err := u.transactionRepository.UpdateTransaction(updatedTransactionDTO)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

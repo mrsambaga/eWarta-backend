@@ -33,7 +33,7 @@ func (h *Handler) CreateNewTransaction(c *gin.Context) {
 		return
 	}
 
-	err = h.transactionUsecase.CreateNewTransaction(newTransactionDTO, uint64(userId))
+	transaction, err := h.transactionUsecase.CreateNewTransaction(newTransactionDTO, uint64(userId))
 	if err != nil {
 		if errors.Is(err, httperror.ErrCreateInvoice) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -62,6 +62,64 @@ func (h *Handler) CreateNewTransaction(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    "SUCCESS_CREATED",
 		"message": "Success create transaction !",
+		"data":    transaction,
+	})
+}
+
+func (h *Handler) FindAllUserTransactions(c *gin.Context) {
+	userId := c.GetInt("id")
+
+	transactions, err := h.transactionUsecase.FindUserTransactions(userId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"code":    "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success Find User Transactions",
+		"data":    transactions,
+	})
+}
+
+func (h *Handler) UpdateTransaction(c *gin.Context) {
+	var validate *validator.Validate = validator.New()
+	editTransactionDTO := &dto.EditTransactionRequestDTO{}
+
+	c.ShouldBindJSON(editTransactionDTO)
+	err := validate.Struct(editTransactionDTO)
+	if err != nil {
+		validationError := err.(validator.ValidationErrors)
+		var errMsg []string
+		for _, fieldError := range validationError {
+			errMsg = append(errMsg, util.GetErrorMsg(fieldError))
+		}
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": errMsg,
+			"data":    nil,
+		})
+		return
+	}
+
+	err = h.transactionUsecase.UpdateTransaction(editTransactionDTO)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"code":    "BAD_REQUEST",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success Update Transactions",
 		"data":    nil,
 	})
 }
