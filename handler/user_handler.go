@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/httperror"
@@ -144,7 +143,6 @@ func (h *Handler) Login(c *gin.Context) {
 func (h *Handler) GetProfile(c *gin.Context) {
 	loggedUserId := c.GetInt("id")
 
-	fmt.Println("LOGGED IN USER : ", loggedUserId)
 	user, err := h.userUsecase.GetProfile(loggedUserId)
 	if err != nil {
 		if errors.Is(err, httperror.ErrUserNotFound) {
@@ -168,5 +166,61 @@ func (h *Handler) GetProfile(c *gin.Context) {
 		"code":    "SUCCESS_CREATED",
 		"message": "Success get user !",
 		"data":    user,
+	})
+}
+
+func (h *Handler) UpdateProfile(c *gin.Context) {
+	loggedUserId := c.GetInt("id")
+	var editedUser *dto.EditUserRequestDTO
+	var validate *validator.Validate = validator.New()
+
+	c.ShouldBindJSON(&editedUser)
+	if editedUser.Email != "" {
+		err := validate.Var(editedUser.Email, "email")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"code":    "BAD_REQUEST",
+				"message": "Invalid email format",
+				"data":    nil,
+			})
+			return
+		}
+	}
+
+	if editedUser.Phone != "" {
+		err := validate.Var(editedUser.Phone, "e164")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"code":    "BAD_REQUEST",
+				"message": "Invalid phone number format",
+				"data":    nil,
+			})
+			return
+		}
+	}
+
+	err := h.userUsecase.UpdateUser(editedUser, loggedUserId)
+	if err != nil {
+		if errors.Is(err, httperror.ErrEmailAlreadyRegistered) {
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+				"error":   "SUCCESS_CREATED",
+				"message": "Email already registered !",
+				"data":    nil,
+			})
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   "INTERNAL_SERVER_ERROR",
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS_CREATED",
+		"message": "Success edit user !",
+		"data":    nil,
 	})
 }

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"stage01-project-backend/dto"
 	"stage01-project-backend/entity"
 	"stage01-project-backend/httperror"
@@ -13,6 +14,7 @@ type UsersUsecase interface {
 	Register(newUserDTO *dto.RegisterRequestDTO) error
 	Login(loginUserDTO *dto.LoginRequestDTO) (*dto.TokenResponse, error)
 	GetProfile(id int) (*dto.UserRespondDTO, error)
+	UpdateUser(editedUser *dto.EditUserRequestDTO, userId int) error
 }
 
 type usersUsecaseImp struct {
@@ -36,7 +38,12 @@ func (u *usersUsecaseImp) Register(newUserDTO *dto.RegisterRequestDTO) error {
 		newUserDTO.Role = defaultRole
 	}
 
-	existingUser, _ := u.usersRepository.GetUserByEmailRole(newUserDTO.Email, newUserDTO.Role)
+	existingUser, err := u.usersRepository.GetUserByEmailRole(newUserDTO.Email, newUserDTO.Role)
+	if err != nil {
+		if err != httperror.ErrUserNotFound {
+			return err
+		}
+	}
 	if existingUser != nil {
 		return httperror.ErrEmailAlreadyRegistered
 	}
@@ -123,4 +130,33 @@ func (u *usersUsecaseImp) GetProfile(id int) (*dto.UserRespondDTO, error) {
 	}
 
 	return userDTO, nil
+}
+
+func (u *usersUsecaseImp) UpdateUser(editedUser *dto.EditUserRequestDTO, userId int) error {
+	existingUser, err := u.usersRepository.GetUserByEmail(editedUser.Email)
+	if err != nil {
+		if err != httperror.ErrUserNotFound {
+			return err
+		}
+	}
+
+	fmt.Println(existingUser)
+	if existingUser != nil {
+		fmt.Println("INI EKSEKUSI")
+		return httperror.ErrEmailAlreadyRegistered
+	}
+
+	user := &entity.User{
+		Name:    editedUser.Name,
+		Email:   editedUser.Email,
+		Phone:   editedUser.Phone,
+		Address: editedUser.Address,
+	}
+
+	err = u.usersRepository.UpdateUser(user, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

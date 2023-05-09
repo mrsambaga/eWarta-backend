@@ -14,6 +14,8 @@ type UsersRepository interface {
 	GetUserByEmailRole(email string, role string) (*entity.User, error)
 	FindUserReferral(referral string) (*entity.User, error)
 	GetUserById(id int) (*entity.User, error)
+	UpdateUser(editedUser *entity.User, userId int) error
+	GetUserByEmail(email string) (*entity.User, error)
 }
 
 type userRepositoryImp struct {
@@ -42,9 +44,9 @@ func (r *userRepositoryImp) CreateUser(newUser *entity.User) error {
 	return nil
 }
 
-func (r *userRepositoryImp) GetAdminByEmail(email string) (*entity.User, error) {
+func (r *userRepositoryImp) GetUserByEmailRole(email string, role string) (*entity.User, error) {
 	user := &entity.User{}
-	if err := r.db.Where("role = ", "admin").Where("email = ?", email).First(user).Error; err != nil {
+	if err := r.db.Where("role = ?", role).Where("email = ?", email).First(user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, httperror.ErrUserNotFound
 		}
@@ -55,9 +57,9 @@ func (r *userRepositoryImp) GetAdminByEmail(email string) (*entity.User, error) 
 	return user, nil
 }
 
-func (r *userRepositoryImp) GetUserByEmailRole(email string, role string) (*entity.User, error) {
+func (r *userRepositoryImp) GetUserByEmail(email string) (*entity.User, error) {
 	user := &entity.User{}
-	if err := r.db.Where("role = ?", role).Where("email = ?", email).First(user).Error; err != nil {
+	if err := r.db.Where("email = ?", email).First(user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, httperror.ErrUserNotFound
 		}
@@ -95,4 +97,13 @@ func (r *userRepositoryImp) FindUserReferral(referral string) (*entity.User, err
 
 	fmt.Println("INI EKSEKUSI 3")
 	return user, nil
+}
+
+func (r *userRepositoryImp) UpdateUser(editedUser *entity.User, userId int) error {
+	user := &entity.User{}
+	if err := r.db.Model(user).Where("user_id = ?", userId).Updates(editedUser).Error; err != nil {
+		return httperror.ErrUpdateUser
+	}
+
+	return nil
 }
