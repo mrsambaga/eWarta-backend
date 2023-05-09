@@ -23,7 +23,7 @@ func (h *Handler) FindAllNews(c *gin.Context) {
 	posts, err := h.postUsecase.FindAllNews(params)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -42,7 +42,7 @@ func (h *Handler) FindNewsDetail(c *gin.Context) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "BAD_REQUEST",
+			"code":    "BAD_REQUEST",
 			"message": httperror.ErrFailedConvertId,
 			"data":    nil,
 		})
@@ -53,7 +53,7 @@ func (h *Handler) FindNewsDetail(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrNewsNotFound) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_ACCESSED",
 				"message": err.Error(),
 				"data":    nil,
 			})
@@ -61,7 +61,7 @@ func (h *Handler) FindNewsDetail(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -80,7 +80,7 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&deletedPost); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "BAD_REQUEST",
+			"code":    "BAD_REQUEST",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -91,7 +91,7 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrNewsNotFound) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":    "SUCCESS_ACCESSED",
 				"message": "Post not found",
 				"data":    nil,
 			})
@@ -99,7 +99,7 @@ func (h *Handler) SoftDeletePost(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -167,14 +167,14 @@ func (h *Handler) CreateNews(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrInvalidCategory) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
+				"code":    "BAD_REQUEST",
 				"message": "Invalid category",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrInvalidType) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
+				"code":    "BAD_REQUEST",
 				"message": "Invalid type",
 				"data":    nil,
 			})
@@ -182,7 +182,7 @@ func (h *Handler) CreateNews(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -202,7 +202,7 @@ func (h *Handler) EditNews(c *gin.Context) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "BAD_REQUEST",
+			"code":    "BAD_REQUEST",
 			"message": httperror.ErrFailedConvertId,
 			"data":    nil,
 		})
@@ -225,14 +225,14 @@ func (h *Handler) EditNews(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrInvalidCategory) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
+				"code":    "BAD_REQUEST",
 				"message": "Invalid category",
 				"data":    nil,
 			})
 			return
 		} else if errors.Is(err, httperror.ErrInvalidType) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
+				"code":    "BAD_REQUEST",
 				"message": "Invalid type",
 				"data":    nil,
 			})
@@ -240,7 +240,7 @@ func (h *Handler) EditNews(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":    "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})

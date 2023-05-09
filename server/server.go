@@ -22,10 +22,17 @@ func createRouter() *gin.Engine {
 	postUsecase := usecase.NewPostsUsecase(&usecase.PostsUsecaseConfig{
 		PostsRepository: postRepo,
 	})
+	transactionRepo := repository.NewTransactionRepository(&repository.SubscriptionRepoConfig{
+		DB: db.Get(),
+	})
+	transactionUsecase := usecase.NewSubscriptionUsecase(&usecase.TransactionUConfig{
+		TransactionRepository: transactionRepo,
+	})
 
 	return NewRouter(&RouterConfig{
-		UserUsecase: userUsecase,
-		PostUsecase: postUsecase,
+		UserUsecase:        userUsecase,
+		PostUsecase:        postUsecase,
+		TransactionUsecase: transactionUsecase,
 	})
 }
 

@@ -11,16 +11,18 @@ import (
 )
 
 type RouterConfig struct {
-	UserUsecase usecase.UsersUsecase
-	PostUsecase usecase.PostsUsecase
+	UserUsecase        usecase.UsersUsecase
+	PostUsecase        usecase.PostsUsecase
+	TransactionUsecase usecase.TransactionUsecase
 }
 
 func NewRouter(cfg *RouterConfig) *gin.Engine {
 	router := gin.Default()
 
 	h := handler.New(&handler.Config{
-		UserUsecase: cfg.UserUsecase,
-		PostUsecase: cfg.PostUsecase,
+		UserUsecase:        cfg.UserUsecase,
+		PostUsecase:        cfg.PostUsecase,
+		TransactionUsecase: cfg.TransactionUsecase,
 	})
 
 	router.POST("/register", h.Register)
@@ -32,6 +34,7 @@ func NewRouter(cfg *RouterConfig) *gin.Engine {
 	router.PUT("/news/:id", middleware.AuthorizeJWT, h.EditNews)
 	router.GET("/profile", middleware.AuthorizeJWT, h.GetProfile)
 	router.PATCH("/profile/edit", middleware.AuthorizeJWT, h.UpdateProfile)
+	router.POST("/transaction", middleware.AuthorizeJWT, h.CreateNewTransaction)
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 	return router

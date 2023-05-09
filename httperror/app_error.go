@@ -29,4 +29,6 @@ var (
 	ErrUpdatePost               = errors.New("error updating post")
 	ErrFailedGetUserById        = errors.New("failed to get user by id")
 	ErrUpdateUser               = errors.New("failed to update user")
+	ErrCreateInvoice            = errors.New("failed to create invoice")
+	ErrCreateTransaction        = errors.New("failed to create transaction")
 )

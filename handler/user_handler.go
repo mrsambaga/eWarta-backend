@@ -118,7 +118,7 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrInvalidEmailPassword) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "BAD_REQUEST",
+				"code":   "BAD_REQUEST",
 				"message": "Wrong email or password !",
 				"data":    nil,
 			})
@@ -126,7 +126,7 @@ func (h *Handler) Login(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":   "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -147,7 +147,7 @@ func (h *Handler) GetProfile(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrUserNotFound) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":   "SUCCESS_CREATED",
 				"message": "User not found !",
 				"data":    nil,
 			})
@@ -155,7 +155,7 @@ func (h *Handler) GetProfile(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":   "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})
@@ -203,7 +203,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, httperror.ErrEmailAlreadyRegistered) {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
-				"error":   "SUCCESS_CREATED",
+				"code":   "SUCCESS_CREATED",
 				"message": "Email already registered !",
 				"data":    nil,
 			})
@@ -211,7 +211,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
+			"code":   "INTERNAL_SERVER_ERROR",
 			"message": err.Error(),
 			"data":    nil,
 		})

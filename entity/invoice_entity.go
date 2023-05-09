@@ -9,7 +9,7 @@ import (
 type Invoice struct {
 	Id          uint64 `gorm:"PrimaryKey"`
 	UserId      uint64
-	VoucherId   uint64
+	VoucherId   *uint64
 	Status      string
 	Total       float64
 	PaymentDate time.Time
