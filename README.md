@@ -2,7 +2,7 @@
 
 ## Description
 
-This is stage 01 web app api project that uses Golang, Gin, and PostgreSQL. This project implement clean architechture with JWT authentication.
+eWarta is a web app api project that uses Golang, Gin, and PostgreSQL. This project implement clean architechture with JWT authentication.
 
 ## Features
 
