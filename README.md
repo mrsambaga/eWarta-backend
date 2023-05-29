@@ -1,8 +1,12 @@
-# Stage 01 Project
+# eWarta Backend
 
 ## Description
 
 eWarta is a web app api project that uses Golang, Gin, and PostgreSQL. This project implement clean architechture with JWT authentication.
+
+## Link to eWarta Frontend
+
+[eWarta Frontend](https://github.com/mrsambaga/eWarta-frontend/tree/dev)
 
 ## Features
 
