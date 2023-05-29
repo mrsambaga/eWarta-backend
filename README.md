@@ -21,7 +21,10 @@ eWarta is a web app api project that uses Golang, Gin, and PostgreSQL. This proj
 ## How to run 
 
 - Clone project to personal directory
-- Type go run . in the terminal
+- go mod install
+- go mod tidy
+- go run . in the terminal
+- open localhost:8000 in postman to test the API
 
 ## Api Documentation Link
 
